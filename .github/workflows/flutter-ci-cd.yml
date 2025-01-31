@@ -36,6 +36,13 @@ jobs:
     - name: Build APK
       run: flutter build apk --release
 
+    - name: Extract Version from pubspec.yaml
+      id: extract_version
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | awk '{print $2}' | tr -d '"')
+        echo "Extracted version: $VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -48,8 +55,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.0
-        release_name: Release v1.0.0
+        tag_name: v${{ steps.extract_version.outputs.version }} # Dynamic version
+        release_name: Release v${{ steps.extract_version.outputs.version }} # Dynamic release name
         draft: false
         prerelease: false
 
