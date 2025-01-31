@@ -75,14 +75,14 @@ jobs:
     - name: Build iOS IPA
       run: flutter build ipa --release --no-codesign
 
-    - name: List IPA files (Debugging)
-      run: ls -R build/ios/ipa/
+    - name: Find IPA file (Debugging)
+      run: find . -name "*.ipa"
 
     - name: Upload iOS IPA as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ios-release-ipa
-        path: build/ios/ipa/
+        path: build/ios/ipa/ # Update this path if the IPA is located elsewhere
 
   create-release:
     runs-on: ubuntu-latest
@@ -135,6 +135,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/ios/ipa/*.ipa
+        asset_path: build/ios/ipa/*.ipa # Update this path if the IPA is located elsewhere
         asset_name: app-release.ipa
         asset_content_type: application/octet-stream
