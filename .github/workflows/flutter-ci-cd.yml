@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Required for creating releases
+      packages: write # Required for uploading release assets
 
     steps:
     - name: Checkout code
@@ -20,12 +21,12 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'temurin' # Use Temurin (Adoptium) JDK
+        distribution: 'temurin'
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.27.0' # Updated Flutter version
+        flutter-version: '3.27.0'
 
     - name: Install dependencies
       run: flutter pub get
@@ -55,8 +56,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.extract_version.outputs.version }} # Dynamic version
-        release_name: Release v${{ steps.extract_version.outputs.version }} # Dynamic release name
+        tag_name: v${{ steps.extract_version.outputs.version }}
+        release_name: Release v${{ steps.extract_version.outputs.version }}
         draft: false
         prerelease: false
 
