@@ -78,11 +78,20 @@ jobs:
     - name: Find IPA file (Debugging)
       run: find . -name "*.ipa"
 
+    - name: Verify artifact upload
+      run: |
+        if [ -f "build/ios/ipa/YourApp.ipa" ]; then
+          echo "IPA file found and will be uploaded."
+        else
+          echo "IPA file not found. Check the build directory."
+          exit 1
+        fi
+
     - name: Upload iOS IPA as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ios-release-ipa
-        path: build/ios/ipa/ # Update this path if the IPA is located elsewhere
+        path: build/ios/ipa/YourApp.ipa # Update this path if the IPA is located elsewhere
 
   create-release:
     runs-on: ubuntu-latest
@@ -135,6 +144,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/ios/ipa/*.ipa # Update this path if the IPA is located elsewhere
+        asset_path: build/ios/ipa/YourApp.ipa # Update this path if the IPA is located elsewhere
         asset_name: app-release.ipa
         asset_content_type: application/octet-stream
