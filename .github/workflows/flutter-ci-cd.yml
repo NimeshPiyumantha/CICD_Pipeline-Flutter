@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Required for creating releases
-      packages: write # Required for uploading release assets
+      contents: write
+      packages: write
 
     steps:
     - name: Checkout code
@@ -51,11 +51,11 @@ jobs:
         path: build/app/outputs/flutter-apk/app-release.apk
 
   build-ios:
-    runs-on: macos-latest # iOS builds require macOS
+    runs-on: macos-latest
 
     permissions:
-      contents: write # Required for creating releases
-      packages: write # Required for uploading release assets
+      contents: write
+      packages: write
 
     steps:
     - name: Checkout code
@@ -72,35 +72,39 @@ jobs:
     - name: Run tests
       run: flutter test
 
+    - name: Install CocoaPods dependencies
+      run: |
+        cd ios
+        pod install
+
     - name: Build iOS IPA
       run: flutter build ipa --release --no-codesign
 
-    - name: List build/ios directory (Debugging)
-      run: ls -R build/ios/
-
-    - name: Find IPA file (Debugging)
-      run: find . -name "*.ipa"
-
-    - name: Verify artifact upload
+    - name: Locate IPA file
+      id: find_ipa
       run: |
-        if [ -f "build/ios/ipa/YourApp.ipa" ]; then
-          echo "IPA file found and will be uploaded."
-        else
-          echo "IPA file not found. Check the build directory."
+        IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
+        if [ -z "$IPA_PATH" ]; then
+          echo "IPA file not found. Check build settings."
           exit 1
         fi
+        echo "IPA found at: $IPA_PATH"
+        echo "ipa_path=$IPA_PATH" >> $GITHUB_ENV
 
     - name: Upload iOS IPA as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ios-release-ipa
-        path: build/ios/ipa/YourApp.ipa # Update this path if the IPA is located elsewhere
+        path: ${{ env.ipa_path }}
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-android, build-ios] # Wait for Android and iOS builds to complete
+    needs: [build-android, build-ios]
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Download Android APK
       uses: actions/download-artifact@v4
       with:
@@ -147,6 +151,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/ios/ipa/YourApp.ipa # Update this path if the IPA is located elsewhere
+        asset_path: ${{ env.ipa_path }}
         asset_name: app-release.ipa
         asset_content_type: application/octet-stream
