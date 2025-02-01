@@ -151,6 +151,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.MY_PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.ipa_path }}
+        asset_path: build/ios/ipa/*.ipa
         asset_name: app-release.ipa
         asset_content_type: application/octet-stream
