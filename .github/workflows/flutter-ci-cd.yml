@@ -75,6 +75,9 @@ jobs:
     - name: Build iOS IPA
       run: flutter build ipa --release --no-codesign
 
+    - name: List build/ios directory (Debugging)
+      run: ls -R build/ios/
+
     - name: Find IPA file (Debugging)
       run: find . -name "*.ipa"
 
